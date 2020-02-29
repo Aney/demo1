@@ -1,0 +1,31 @@
+"craftsman"
+
+craft, collect
+
+stick, pick
+mining, woodcut, fishing, cookk
+
+build auto collectors
+
+lumbermill, mines
+
+--
+
+Main
+Event handler
+Utilities
+Assets (pics, sounds, etc)
+Helpers
+Entities
+
+
+ECS
+How to do Entinity component system
+Entity. Player, enemy, bullet, sword, etc
+
+
+
+
+
+Collison detection
+Basic projectile
