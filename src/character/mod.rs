@@ -3,14 +3,59 @@ use ggez::graphics;
 use ggez::nalgebra;
 use ggez::GameResult;
 
+// Entity
+// Mass
+// Position
+// velocity
+// acceleration
+
+// SoA Structure of Arrays
+struct Entity{
+    id:i32,
+}
+
+struct DebugNameComponentManager{
+    pub set_debug_name(e:Entity, name:String);
+    debug_name:String(e:Entity);
+}
+
+// Components should be pure data structures (Data)
+
+// Systems contain the behaviours (Behaviour)
+
+pub struct Position{
+    pub x: f32, // Public for now, will change to tuple "get_position"
+    pub y: f32,
+    pub up: bool,
+    pub down: bool,
+    pub left: bool,
+    pub right: bool,
+}
+
+
 pub trait Movement{
-  fn move_character(&mut self);
-  fn move_x(&mut self, movement: f32);
-  fn move_y(&mut self, movement: f32);
+    fn move_character(&mut self);
+    fn move_x(&mut self, movement: f32);
+    fn move_y(&mut self, movement: f32);
+}
+
+struct Controllable{
+
+}
+
+pub fn move_entity(mut position:&mut Position, movement:[f32;4]){
+    // Move Up
+    position.y -= movement[0];
+    // Move Down
+    position.y += movement[1];
+    // Move Left
+    position.x -= movement[2];
+    // Move Right
+    position.x += movement[3];
 }
 
 impl Movement for Character
-  {
+{
   fn move_character(&mut self){
     if self.position.up{
       self.move_y(-self.stats.speed);
@@ -49,15 +94,6 @@ pub struct Statistics{
   attack: u8,
   max_health: u8,
   current_health: u8,
-}
-
-pub struct Position{
-  pub x: f32, // Public for now, will change to tuple "get_position"
-  pub y: f32,
-  pub up: bool,
-  pub down: bool,
-  pub left: bool,
-  pub right: bool,
 }
 
 impl Character{

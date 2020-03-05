@@ -1,25 +1,19 @@
 use ggez::{graphics, Context, ContextBuilder, GameResult};
 use ggez::event::{self, EventHandler};
 use ggez::event::{KeyCode, KeyMods};
-
 use ggez::nalgebra as na;
 
 mod character;
 use character::{Character, Movement};
+
 mod utilities;
+use utilities::{WINDOW_HEIGHT, WINDOW_WIDTH};
+
 mod npc;
 use npc::NPC;
 
-const WINDOW_WIDTH:f32 = 640.0;
-const WINDOW_HEIGHT:f32 = 480.0;
-
-enum AttackPosition{
-    UP,
-    DOWN,
-    LEFT,
-    RIGHT,
-    NONE,
-}
+mod enums;
+use enums::AttackPosition;
 
 struct MyGame {
     player: Character,  // Player's toon
@@ -28,10 +22,7 @@ struct MyGame {
     rotation: f32,
     evil_fellas: Vec<NPC>,
     attack_pos: [f32; 2],
-    // Map?
-    // Enemies?
-    // ??
-    // Your state here...
+    movers: Vec<character::Movement>
 }
 
 impl MyGame {
@@ -68,8 +59,6 @@ impl MyGame {
 impl EventHandler for MyGame {
     fn update(&mut self, _ctx: &mut Context) -> GameResult<()> {
         // Update code here...
-        // graphics::set_window_title(&ctx, &self.player.epic_style());
-        // self.player.say_name();
         self.player.move_character();
 
         // Change attack position
@@ -90,15 +79,9 @@ impl EventHandler for MyGame {
         // If the player x/y
         // overlaps one of the evil_fellas
         for evil in self.evil_fellas.iter(){
-            // println!("Evil: {}");
             println!("Attack: {} {}",
                 self.player.position.x + self.attack_pos[0],
                 self.player.position.y + self.attack_pos[1]);
-            // if self.attacking &&
-            // evil[0] == self.player.position.x + self.attack_pos[0]
-            // {
-            //     println!("evil dead");    
-            // }
         }
 
         Ok(())
@@ -135,6 +118,9 @@ impl EventHandler for MyGame {
                 self.rotation = utilities::deg_to_rotate(-90);},
             KeyCode::E => self.player.change_speed(0.5),
             KeyCode::Q => self.player.change_speed(-0.5),
+            KeyCode::F => character::move_entity(&mut self.player.position,
+                [10.0,0.0,0.0,0.0]
+            ),
             _ => println!("You pressed: {:?}", keycode)
         }
     }
