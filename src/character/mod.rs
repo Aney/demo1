@@ -3,6 +3,8 @@ use ggez::graphics;
 use ggez::nalgebra;
 use ggez::GameResult;
 
+// Things are public, but will be altered where need be, just for PoC
+
 // SoA Structure of Arrays
 struct Entity{
     id:i32,
@@ -13,7 +15,7 @@ struct Component{
 
 }
 
-enum Entity_Type{
+pub enum Entity_Type{
     Player, // Green
     NPC,    // Blue
     Enemy,  // Red
@@ -38,14 +40,15 @@ pub struct Position{
     pub y: f32,
 }
 
+#[derive(Copy, Clone)]
 pub struct Direction{
-    up: bool,
-    down: bool,
-    left: bool,
-    right: bool,
+    pub up: bool,
+    pub down: bool,
+    pub left: bool,
+    pub right: bool,
 }
 
-struct _Health{
+struct Health{
     max_health: u8,
     health: u8,
 }
@@ -65,7 +68,7 @@ struct _Levelling{
 pub struct Character{
     _name: String,
     pub position: Position,
-    entity: Entity_Type,
+    pub entity: Entity_Type,
     pub direction: Direction,
 }
 
@@ -88,7 +91,7 @@ pub fn new_character(name: &str) -> Character{
             left: false,
             right: false,
         },
-        entity: Entity_Type::Player
+        entity: Entity_Type::Player,
     }
 }
 
@@ -97,25 +100,41 @@ pub fn shoot(x: &f32, y: &f32, direction: &Direction, vect: &mut Vec<Character>)
 }
 
 pub fn new_attack(x: &f32, y: &f32, direction: &Direction) -> Character{
-    Character{
+    let x:Character = Character{
         _name: "Chef".to_string(),
         position: Position{
             x: *x,
             y: *y,
         },
-        direction: Direction{
-            up: false,
-            down: false,
-            left: false,
-            right: false,
-        },
-        entity: Entity_Type::Attack
-    }
+        direction: *direction,
+        entity: Entity_Type::Attack,
+    };
+
+    x
 }
 
-pub fn move_entity(position: &mut Position, x:f32, y:f32){
-    position.x += x;
-    position.y += y;
+pub fn move_entity(character: &mut Character){
+    let mut temp_speed:f32 = 0.0;
+
+    match character.entity{
+        Entity_Type::Player => temp_speed = 2.0,
+        Entity_Type::Attack => temp_speed = 5.0,
+        _ => temp_speed = 3.0,
+    }
+    
+
+    if character.direction.up{
+        character.position.y -= temp_speed;
+    }
+    if character.direction.down{
+        character.position.y += temp_speed;
+    }
+    if character.direction.left{
+        character.position.x -= temp_speed;
+    }
+    if character.direction.right{
+        character.position.x += temp_speed;
+    }
 }
 
 pub fn move_y(position: &mut Position, y:f32){
@@ -126,12 +145,21 @@ pub fn move_x(position: &mut Position, x:f32){
     position.x += x
 }
 
-pub fn draw_entity(ctx: &mut Context, position: &Position) -> GameResult{
+pub fn draw_entity(ctx: &mut Context, position: &Position,
+    entity: &Entity_Type) -> GameResult{
+
+    let mut size:i32 = 0;
+
+    match entity{
+        Entity_Type::Player => size = 32,
+        Entity_Type::Attack => size = 16,
+        _ => size = 0,
+    }
     // Mesh
     let circle = graphics::Mesh::new_rectangle(
         ctx, 
         graphics::DrawMode::fill(), 
-        graphics::Rect::new_i32(0, 0, 32, 32),
+        graphics::Rect::new_i32(0, 0, size, size),
         graphics::WHITE
     )?;
 

@@ -36,8 +36,14 @@ impl EventHandler for MyGame {
     fn update(&mut self, _ctx: &mut Context) -> GameResult<()> {
         // Update code here...
 
+        // character::move_entity(&mut self.player.position, 
+        //     &self.player.direction);
+
+        character::move_entity(&mut self.player);
+
         for x in 0..self.projectiles.len() {
-            self.projectiles[x].position.x += 2.0;   
+            character::move_entity(&mut self.projectiles[x]);
+            // self.projectiles[x].position.x += 2.0;   
         }
 
         Ok(())
@@ -50,13 +56,45 @@ impl EventHandler for MyGame {
         
         match keycode{
             KeyCode::Escape => ggez::event::quit(ctx),
-            KeyCode::W => character::move_y(&mut self.player.position, -5.0),
-            KeyCode::S => character::move_y(&mut self.player.position, 5.0),
-            KeyCode::A => character::move_x(&mut self.player.position, -5.0),
-            KeyCode::D => character::move_x(&mut self.player.position, 5.0),
+            KeyCode::W => self.player.direction.up = true,
+            KeyCode::S => self.player.direction.down = true,
+            KeyCode::A => self.player.direction.left = true,
+            KeyCode::D => self.player.direction.right = true,
             KeyCode::Right => character::shoot(&self.player.position.x,
                 &self.player.position.y,
-                &self.player.direction,
+                &character::Direction{
+                    up: false,
+                    down: false,
+                    left: false,
+                    right: true,
+                },
+                &mut self.projectiles),
+            KeyCode::Left => character::shoot(&self.player.position.x,
+                &self.player.position.y,
+                &character::Direction{
+                    up: false,
+                    down: false,
+                    left: true,
+                    right: false,
+                },
+                &mut self.projectiles),
+            KeyCode::Up => character::shoot(&self.player.position.x,
+                &self.player.position.y,
+                &character::Direction{
+                    up: true,
+                    down: false,
+                    left: false,
+                    right: false,
+                },
+                &mut self.projectiles),
+            KeyCode::Down => character::shoot(&self.player.position.x,
+                &self.player.position.y,
+                &character::Direction{
+                    up: false,
+                    down: true,
+                    left: false,
+                    right: false,
+                },
                 &mut self.projectiles),
             _ => println!("You pressed: {:?}", keycode)
         }
@@ -66,6 +104,10 @@ impl EventHandler for MyGame {
         keycode: KeyCode, _keymods: KeyMods) 
     {
         match keycode{
+            KeyCode::W => self.player.direction.up = false,
+            KeyCode::S => self.player.direction.down = false,
+            KeyCode::A => self.player.direction.left = false,
+            KeyCode::D => self.player.direction.right = false,
             _ => println!("You released: {:?}", keycode)
         }
     }
@@ -75,14 +117,14 @@ impl EventHandler for MyGame {
         graphics::clear(ctx, [0.1, 0.2, 0.3, 1.0].into()); // clear's to colour
 
         character::draw_entity(
-            ctx, &self.player.position)?;
+            ctx, &self.player.position, &self.player.entity)?;
 
         for entity in self.npc.iter(){
-            character::draw_entity(ctx, &entity.position)?;
+            character::draw_entity(ctx, &entity.position, &entity.entity)?;
         }
 
         for projectile in self.projectiles.iter(){
-            character::draw_entity(ctx, &projectile.position)?;
+            character::draw_entity(ctx, &projectile.position, &projectile.entity)?;
         }
 
         graphics::present(ctx)?;
